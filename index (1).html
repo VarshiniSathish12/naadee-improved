@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Assessment Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #f1f4f9; padding: 40px; }
+        .container { width: 60%; margin: auto; padding: 30px; background: white; border-radius: 15px; box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1); }
+        .question { text-align: left; }
+        button { margin: 15px; padding: 12px 25px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; }
+        #prev { background-color: #87CEFA; color: white; }
+        #next { background-color: #98FB98; color: white; }
+        .buttons-container { text-align: left; margin-top: 20px; }
+        .options-container label { display: block; margin-bottom: 10px; text-align: left; }
+        .book-btn { background-color: #ff5722; color: white; font-size: 18px; font-weight: bold; padding: 15px 30px; border-radius: 8px; cursor: pointer; transition: 0.3s; border: none; }
+        .book-btn:hover { background-color: #e64a19; transform: scale(1.05); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Gamify Your Health: Take the Assessment</h2>
+        <div id="questions"></div>
+        <div class="buttons-container">
+            <button id="prev" onclick="prevQuestion()" disabled>Previous</button>
+            <button id="next" onclick="nextQuestion()">Next</button>
+        </div>
+        <div id="result" style="display: none; margin-top: 20px;"></div>
+    </div>
+    
+    <script>
+        const questions = [
+            { q: "How often do you exercise per week?", options: { "3+ times": 2, "1-2 times": 1, "Rarely/Never": 0 } },
+            { q: "How would you describe your diet?", options: { "Balanced & Healthy": 2, "Somewhat healthy": 1, "Unhealthy": 0 } },
+            { q: "Do you smoke or consume tobacco?", options: { "No": 1, "Yes": 0 } },
+            { q: "How often do you consume alcohol?", options: { "Rarely/Never": 2, "Occasionally": 1, "Frequently": 0 } },
+            { q: "How is your sleep quality?", options: { "7+ hours, restful": 2, "5-6 hours, somewhat disturbed": 1, "Less than 5 hours, poor sleep": 0 } },
+            { q: "Do you experience frequent stress?", options: { "Rarely/Never": 2, "Sometimes": 1, "Yes, very often": 0 } },
+            { q: "Do you have any pre-existing medical conditions?", options: { "No": 1, "Yes": 0 } },
+            { q: "Do you get regular health checkups?", options: { "Yes, annually": 2, "Occasionally": 1, "Rarely/Never": 0 } }
+        ];
+
+        let currentQuestion = 0;
+        let answers = Array(questions.length).fill(null);
+
+        function nextQuestion() {
+            const selectedOption = document.querySelector("input[name='answer']:checked");
+            if (selectedOption) {
+                answers[currentQuestion] = parseInt(selectedOption.value);
+                if (currentQuestion < questions.length - 1) {
+                    currentQuestion++;
+                    loadQuestion();
+                } else {
+                    document.querySelector(".buttons-container").style.display = "none";
+                    calculateResult();
+                }
+            } else {
+                alert("Please select an answer before proceeding.");
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                loadQuestion();
+            }
+        }
+
+        function loadQuestion() {
+            const questionContainer = document.getElementById("questions");
+            questionContainer.innerHTML = '';
+            const qData = questions[currentQuestion];
+            const questionElement = document.createElement("h3");
+            questionElement.textContent = qData.q;
+            questionContainer.appendChild(questionElement);
+            const optionsContainer = document.createElement("div");
+            optionsContainer.classList.add("options-container");
+            Object.entries(qData.options).forEach(([text, value]) => {
+                const optionElement = document.createElement("label");
+                optionElement.innerHTML = `<input type='radio' name='answer' value='${value}'> ${text}`;
+                optionsContainer.appendChild(optionElement);
+            });
+            questionContainer.appendChild(optionsContainer);
+        }
+
+        function calculateResult() {
+            const totalScore = answers.reduce((sum, val) => sum + (val !== null ? val : 0), 0);
+            let interpretation = "";
+            if (totalScore >= 12) {
+                interpretation = "Your health is excellent! Keep maintaining your healthy lifestyle.";
+            } else if (totalScore >= 8) {
+                interpretation = "Your health is good, but there's room for improvement. Consider minor lifestyle changes.";
+            } else if (totalScore >= 4) {
+                interpretation = "Your health needs attention. Consider making significant lifestyle adjustments.";
+            } else {
+                interpretation = "Your health is at risk. Seeking professional guidance is highly recommended.";
+            }
+
+            document.getElementById("questions").style.display = "none";
+            document.getElementById("result").innerHTML = `<h3>Your Score: ${totalScore}/14</h3><p>${interpretation}</p>
+                <button class='book-btn' onclick="window.open('https://naadee.icliniq.com/health-assessment/?utm_source=newsletter&utm_medium=email&utm_campaign=HAT', '_blank')">📅 Book a Health Assessment Now</button>
+                <br><br><button onclick="location.reload()">🔄 Take the Assessment Again</button>`;
+            document.getElementById("result").style.display = "block";
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
